@@ -18,6 +18,7 @@ contract NagaKids is ERC721A, ERC721AQueryable, ERC721ABurnable, Ownable {
     uint256 public constant maxSupply = 1111;
 
     event SetMinter(address indexed caller, address indexed minter);
+    event SetBaseURI(string BaseURIBefore,string BaseURIAfter);
 
     modifier onlyMinter() {
         require(msg.sender == minter, "You are not a minter");
@@ -43,7 +44,10 @@ contract NagaKids is ERC721A, ERC721AQueryable, ERC721ABurnable, Ownable {
     }
 
     function setBaseURI(string memory newBaseURI) public onlyOwner {
+        string memory _baseURIBefore = baseURI;
         baseURI = newBaseURI;
+
+        emit SetBaseURI(baseURI,newBaseURI);
     }
 
     function tokenURI(uint256 tokenId) public view virtual override(ERC721A,IERC721A) returns (string memory){
@@ -69,7 +73,7 @@ contract NagaKids is ERC721A, ERC721AQueryable, ERC721ABurnable, Ownable {
         uint256 startTokenId,
         uint256 quantity
     ) internal override {
-        super._beforeTokenTransfers(from, to, startTokenId,quantity);
+        super._beforeTokenTransfers(from, to, startTokenId, quantity);
     }
 
     // The following functions are overrides required by Solidity.
