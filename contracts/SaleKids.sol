@@ -9,14 +9,13 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./INagaKid.sol";
 import "./VerifySignature.sol";
 
-contract SaleKids1 is Ownable, ReentrancyGuard, VerifySignature {
+contract SaleKids is Ownable, ReentrancyGuard, VerifySignature {
 
     bytes32 public constant WHITELIST_MINT_ROUND = keccak256("WHITELIST_MINT_ROUND"); // 0x68e7d51fdb912cb107dda2e59b053d87fcca666dd0ef5339cd3474ccb5276bba
     bytes32 public constant NAGA_HOLDER_MINT_ROUND = keccak256("NAGA_HOLDER_MINT_ROUND"); // 0xb3c595e55271590809f54e2f4fc3a582754f45b104dd3c41666e2ad310493db3
   
     bytes32 public constant DEFAULT = 0x0000000000000000000000000000000000000000000000000000000000000000;
-    
-    bytes32 public constant WITHDRAW_ROLE = keccak256("WITHDRAW_ROLE");
+
 
     INagaKid public nagaKidContract;
     bytes32 public currentMintRound;
