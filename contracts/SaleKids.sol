@@ -37,13 +37,12 @@ contract SaleKids is Ownable, ReentrancyGuard {
     event RoundChanged(bytes32 roundBefore, bytes32 roundAfter);
     event SignerChanged(address signerBefore,address signerAfter);
     event Withdraw(address to, uint256 balanceOFContract , uint256 timestamp);
-    event withdrawToken(address to,address currency,uint256 balanceOfContract,uint256 timestamp);
-    event WithdrawNFT(address to,address NFT,uint256 tokenId, uint256 timestamp);
+    event WithdrawToken(address to,address currency,uint256 balanceOfContract,uint256 timestamp);
     event PublicMintChanged(bool boolean);
     event PrivateMintChanged(bool boolean);
 
-    constructor(INagaKid _nagaKids,address _signer, bytes32 _merkleRoot) {
-        setnagaKids(_nagaKids);
+    constructor(INagaKid _nagaKids, address _signer, bytes32 _merkleRoot) {
+        setNagaKids(_nagaKids);
         setMerkleRoot(_merkleRoot);
         setSigner(_signer);
     }
@@ -62,7 +61,7 @@ contract SaleKids is Ownable, ReentrancyGuard {
         address oldNagaKids = address(nagaKids);
         nagaKids = _nagaKids;
         address nagaKidsAfter = address(_nagaKids);
-        emit nagaKidsChanged(oldNagaKids, nagaKidsAfter);
+        emit NagaKidsChanged(oldNagaKids, nagaKidsAfter);
     }
 
     //private round
@@ -115,7 +114,7 @@ contract SaleKids is Ownable, ReentrancyGuard {
         require(tx.origin == msg.sender, "haha Contract can't call me");
         require(isPublicUserMinted(msg.sender) != true, "You are already minted.");
         require(getTotalSupply() + 1 <= 1111, "Over Supply Amount");
-        require(recover(signer, msg.sender, _sig), "Unauthorized PublicMint This User.");
+        require(ECDSA.recover(keccak256(abi.encodePacked(msg.sender, address(this))), _sig) == signer, "Unauthorized PublicMint This User.");
 
         // publicMint User can get only 1 //
         uint256 _amount = 1; 
@@ -140,12 +139,12 @@ contract SaleKids is Ownable, ReentrancyGuard {
         emit Withdraw(_to, balanceOFContract ,block.timestamp);
     }
 
-    function withdrawToken(address _to,address _token) public onlyOwner {
+    function withdrawToken(address _to, address _token) public onlyOwner {
         uint balanceOfContract = IERC20(_token).balanceOf(address(this));
         require(balanceOfContract > 0, "Insufficient Balance");
         IERC20(_token).transfer(_to, balanceOfContract);
         
-        emit withdrawToken(_to, _token, balanceOfContract, block.timestamp);
+        emit WithdrawToken(_to, _token, balanceOfContract, block.timestamp);
     }
 
     function isPrivateUserMinted(address _user,bytes32 _round) public view returns(bool) {
