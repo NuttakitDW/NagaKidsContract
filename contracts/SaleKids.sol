@@ -2,7 +2,6 @@
 pragma solidity ^0.8.15;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -38,7 +37,7 @@ contract SaleKids is Ownable, ReentrancyGuard, VerifySignature {
     event RoundChanged(bytes32 roundBefore, bytes32 roundAfter);
     event SignerChanged(address signerBefore,address signerAfter);
     event Withdraw(address to, uint256 balanceOFContract , uint256 timestamp);
-    event WithdrawCurrency(address to,address currency,uint256 balanceOfContract,uint256 timestamp);
+    event withdrawToken(address to,address currency,uint256 balanceOfContract,uint256 timestamp);
     event WithdrawNFT(address to,address NFT,uint256 tokenId, uint256 timestamp);
     event PublicMintChanged(bool boolean);
     event PrivateMintChanged(bool boolean);
@@ -143,27 +142,19 @@ contract SaleKids is Ownable, ReentrancyGuard, VerifySignature {
         emit Withdraw(_to, balanceOFContract ,block.timestamp);
     }
 
-    function withdrawCurrency(address _to,address _currency) public onlyOwner {
-        uint balanceOfContract = IERC20(_currency).balanceOf(address(this));
+    function withdrawToken(address _to,address _token) public onlyOwner {
+        uint balanceOfContract = IERC20(_token).balanceOf(address(this));
         require(balanceOfContract > 0, "Insufficient Balance");
-        IERC20(_currency).transfer(_to, balanceOfContract);
+        IERC20(_token).transfer(_to, balanceOfContract);
         
-        emit WithdrawCurrency(_to,_currency,balanceOfContract,block.timestamp);
-    }
-
-    function withdrawNFT(address _to,address _NFT,uint256 _tokenId) public onlyOwner {
-        require(IERC721(_NFT).ownerOf(_tokenId) == address(this), "This tokenId is not owned by contract");
-
-        IERC721(_NFT).safeTransferFrom(address(this), _to, _tokenId);
-        
-        emit WithdrawNFT(_to,_NFT,_tokenId,block.timestamp);
+        emit withdrawToken(_to, _token, balanceOfContract, block.timestamp);
     }
 
     function isPrivateUserMinted(address _user,bytes32 _round) public view returns(bool) {
         return _isPrivateUserMinted[_user][_round];
     }
 
-    function userMintedAmount(address _user,bytes32 _round) public view returns(uint256) {
+    function privateUserMintedAmount(address _user,bytes32 _round) public view returns(uint256) {
         return _privateUserMintedAmount[_user][_round];
     }
 
