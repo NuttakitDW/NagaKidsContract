@@ -2,10 +2,17 @@ const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
 describe("Greeter", function () {
-  it("Should return the new greeting once it's changed", async function () {
-    const Greeter = await ethers.getContractFactory("Greeter");
-    const greeter = await Greeter.deploy("Hello, world!");
+
+  let Greeter;
+  let greeter;
+
+  beforeEach(async function() {
+    Greeter = await ethers.getContractFactory("Greeter");
+    greeter = await Greeter.deploy("Hello, world!");
     await greeter.deployed();
+  });
+
+  it("Should return the new greeting once it's changed", async function () {
 
     expect(await greeter.greet()).to.equal("Hello, world!");
 
@@ -16,4 +23,11 @@ describe("Greeter", function () {
 
     expect(await greeter.greet()).to.equal("Hola, mundo!");
   });
+
+  it("Should fail", async function () {
+    await expect( greeter.setNum(2)).to.reverted;
+  });
+
+  
 });
+
