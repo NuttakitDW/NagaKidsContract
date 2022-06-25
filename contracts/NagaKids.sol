@@ -63,10 +63,6 @@ contract NagaKids is ERC721A, ERC721AQueryable, ERC721ABurnable, Ownable {
         _safeMint(to, amount);
     }
 
-    function isMinter(address minter) public view returns(bool) {
-        return _allowMinter[minter];
-    }
-
     function _beforeTokenTransfers(
         address from,
         address to,
