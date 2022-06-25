@@ -32,12 +32,12 @@ contract SaleKids is Ownable, ReentrancyGuard {
     // Events
     event PrivateMinted(address indexed user, uint256 amount, uint256 timestamp);
     event PublicMinted(address indexed user, uint256 amount, uint256 timestamp);
-    event NagaKidsChanged(address oldNagaKids, address nagaKidsAfter);
-    event MerkleRootChanged(bytes32 merkleRootBefore, bytes32 merkleRootAfter);
-    event RoundChanged(bytes32 roundBefore, bytes32 roundAfter);
-    event SignerChanged(address signerBefore,address signerAfter);
+    event NagaKidsChanged(address oldNagaKids, address newNagaKids);
+    event MerkleRootChanged(bytes32 merkleRootBefore, bytes32 newMerkleRoot);
+    event RoundChanged(bytes32 oldRound, bytes32 newRound);
+    event SignerChanged(address oldSigner, address afterSigner);
     event Withdraw(address to, uint256 balanceOFContract , uint256 timestamp);
-    event WithdrawToken(address to,address currency,uint256 balanceOfContract,uint256 timestamp);
+    event WithdrawToken(address to,address currency, uint256 balanceOfContract, uint256 timestamp);
     event PublicMintChanged(bool boolean);
     event PrivateMintChanged(bool boolean);
 
@@ -60,8 +60,8 @@ contract SaleKids is Ownable, ReentrancyGuard {
     function setNagaKids(INagaKid _nagaKids) public onlyOwner {
         address oldNagaKids = address(nagaKids);
         nagaKids = _nagaKids;
-        address nagaKidsAfter = address(_nagaKids);
-        emit NagaKidsChanged(oldNagaKids, nagaKidsAfter);
+        address newNagaKids = address(_nagaKids);
+        emit NagaKidsChanged(oldNagaKids, newNagaKids);
     }
 
     //private round

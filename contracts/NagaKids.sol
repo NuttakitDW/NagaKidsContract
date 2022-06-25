@@ -18,7 +18,7 @@ contract NagaKids is ERC721A, ERC721AQueryable, ERC721ABurnable, Ownable {
     uint256 public constant maxSupply = 1111;
 
     event SetMinter(address indexed caller, address indexed minter);
-    event SetBaseURI(string BaseURIBefore,string BaseURIAfter);
+    event SetBaseURI(string BaseURIBefore, string BaseURIAfter);
 
     modifier onlyMinter() {
         require(msg.sender == minter, "You are not a minter");
