@@ -17,23 +17,23 @@ contract SaleKids is Ownable, ReentrancyGuard, VerifySignature {
     bytes32 public constant DEFAULT = 0x0000000000000000000000000000000000000000000000000000000000000000;
 
 
-    INagaKid public nagaKidContract;
+    INagaKid public nagaKids;
     bytes32 public currentMintRound;
     bytes32 public merkleRoot;
 
-    bool public isPublicMintOpen = false;
-    bool public isPrivateMintOpen = false;
+    bool public isPublic = false;
+    bool public isPublic = false;
 
     address public signer;
 
-    mapping(address => mapping(bytes32 => bool)) internal _isUserMinted;
-    mapping(address => mapping(bytes32 => uint256)) internal _userMintedAmount;
-    mapping(address => bool) internal _isPublicMinted;
+    mapping(address => mapping(bytes32 => bool)) internal _isPrivateUserMinted;
+    mapping(address => mapping(bytes32 => uint256)) internal _privateUserMintedAmount;
+    mapping(address => bool) internal _isPublicUserMinted;
 
     // Events
     event PrivateMinted(address indexed user, uint256 amount, uint256 timestamp);
     event PublicMinted(address indexed user, uint256 amount, uint256 timestamp);
-    event NagaKidContractChanged(address nagaKidBefore, address nagaKidAfter);
+    event NagaKidsChanged(address oldNagaKids, address nagaKidsAfter);
     event MerkleRootChanged(bytes32 merkleRootBefore, bytes32 merkleRootAfter);
     event RoundChanged(bytes32 roundBefore, bytes32 roundAfter);
     event SignerChanged(address signerBefore,address signerAfter);
@@ -43,93 +43,95 @@ contract SaleKids is Ownable, ReentrancyGuard, VerifySignature {
     event PublicMintChanged(bool boolean);
     event PrivateMintChanged(bool boolean);
 
-    constructor(INagaKid _nagaKidContract,address _signer, bytes32 _merkleRoot) {
-        
-        setNagaKidContract(_nagaKidContract);
+    constructor(INagaKid _nagaKids,address _signer, bytes32 _merkleRoot) {
+        setnagaKids(_nagaKids);
         setMerkleRoot(_merkleRoot);
         setSigner(_signer);
-
     }
 
     function setPublicMint(bool _bool) public onlyOwner {
-        isPublicMintOpen = _bool;
-
+        isPublic = _bool;
         emit PublicMintChanged(_bool);
     }
 
     function setPrivateMint(bool _bool) public onlyOwner {
-        isPrivateMintOpen = _bool;
-
+        isPublic = _bool;
         emit PrivateMintChanged(_bool);
     }
 
-    function setNagaKidContract(INagaKid _nagaKid) public onlyOwner {
-        address nagaKidBefore = address(nagaKidContract);
-        nagaKidContract = _nagaKid;
-        address nagaKidAfter = address(_nagaKid);
-
-        emit NagaKidContractChanged(nagaKidBefore, nagaKidAfter);
+    function setNagaKids(INagaKid _nagaKids) public onlyOwner {
+        address oldNagaKids = address(nagaKids);
+        nagaKids = _nagaKids;
+        address nagaKidsAfter = address(_nagaKids);
+        emit nagaKidsChanged(oldNagaKids, nagaKidsAfter);
     }
 
+    //private round
     function setRound(bytes32 _round) public onlyOwner {
-        bytes32 _roundBefore = currentMintRound;
+        bytes32 _oldRound = currentMintRound;
         currentMintRound = _round;
 
-        emit RoundChanged(_roundBefore, _round);
+        emit RoundChanged(_oldRound, _round);
     }
 
     function setSigner(address _signer) public onlyOwner {
-        address _signerBefore = signer;
+        address _oldSigner = signer;
         signer = _signer;
 
-        emit SignerChanged(_signerBefore, _signer);
+        emit SignerChanged(_oldSigner, _signer);
     }
 
     function setMerkleRoot(bytes32 _merkleRoot) public onlyOwner {
-        bytes32 _merkleRootBefore = merkleRoot;
+        bytes32 _oldMerkleRoot = merkleRoot;
         merkleRoot = _merkleRoot;
 
-        emit MerkleRootChanged(_merkleRootBefore, _merkleRoot);
+        emit MerkleRootChanged(_oldMerkleRoot, _merkleRoot);
     }
 
-    function allowlistMint(bytes32[] calldata _proof, uint256 _amount, bytes32 _round) public payable nonReentrant {
-        require(isPrivateMintOpen == true,"Private mint is not open.");
+    function privateMint(bytes32[] calldata _proof, uint256 _amount, bytes32 _round) public payable nonReentrant {
+
+        //This is payable function.
+        //You can tip Naga Team if you want.
+
+        require(isPrivate == true,"Private mint is not open.");
         require(_round != DEFAULT,"Mint is not approved.");
         require(currentMintRound == _round, "Contract are not in this minting round.");
-        require(getTotalSupply() + _amount < getMaxSupply(), "Over supply");
-        require(isUserMinted(msg.sender,_round) == false, "You are already minted.");
-        require(nagaKidContract.isMinter(address(this)), "Contract Mint is not approved.");
+        require(getTotalSupply() + _amount <= 1011,"Over Supply Amount");
+        require(isPrivateUserMinted(msg.sender, _round) == false, "You are already minted.");
         require(MerkleProof.verify(_proof, merkleRoot, keccak256(abi.encodePacked(msg.sender, _amount, _round))), "Unauthorized WhitelistMint This User.");
 
-        _isUserMinted[msg.sender][_round] = true;
-        _userMintedAmount[msg.sender][_round] += _amount;
+        _isPrivateUserMinted[msg.sender][_round] = true;
+        _privateUserMintedAmount[msg.sender][_round] += _amount;
 
-        nagaKidContract.safeMint(msg.sender,_amount);
+        nagaKids.safeMint(msg.sender,_amount);
 
         emit PrivateMinted(msg.sender, _amount, block.timestamp);
     }
 
     function publicMint(bytes calldata _sig) public payable nonReentrant {
 
-        require(isPublicMintOpen == true, "Public mint is not open.");
+        //This is payable function.
+        //You can tip Naga Team if you want.
+        
+        require(isPublic == true, "Public mint is not open.");
         require(tx.origin == msg.sender, "haha Contract can't call me");
-        require(isPublicMinted(msg.sender) != true, "You are already minted.");
-        // require(getTotalSupply() + 1 < 1111,"Over Supply Amount");
-        require(nagaKidContract.isMinter(address(this)), "Contract Mint is not approved.");
+        require(isPublicUserMinted(msg.sender) != true, "You are already minted.");
+        require(getTotalSupply() + 1 <= 1111,"Over Supply Amount");
+        require(nagaKids.isMinter(address(this)), "Contract Mint is not approved.");
         require(verify(signer,msg.sender,_sig), "Unauthorized PublicMint This User.");
 
         // publicMint User can get only 1 //
         uint256 _amount = 1; 
 
-        _isPublicMinted[msg.sender] = true;
-        nagaKidContract.safeMint(msg.sender,_amount);
+        _isPublicUserMinted[msg.sender] = true;
+        nagaKids.safeMint(msg.sender, _amount);
         
-        emit PublicMinted(msg.sender,_amount,block.timestamp);
+        emit PublicMinted(msg.sender, _amount, block.timestamp);
 
     }
 
-    function isPublicMinted(address _addr) public view returns(bool){
-        return _isPublicMinted[_addr];
+    function isPublicUserMinted(address _addr) public view returns(bool){
+        return _isPublicUserMinted[_addr];
     }
 
     function withdraw(address _to) public onlyOwner {
@@ -157,20 +159,20 @@ contract SaleKids is Ownable, ReentrancyGuard, VerifySignature {
         emit WithdrawNFT(_to,_NFT,_tokenId,block.timestamp);
     }
 
-    function isUserMinted(address _user,bytes32 _round) public view returns(bool) {
-        return _isUserMinted[_user][_round];
+    function isPrivateUserMinted(address _user,bytes32 _round) public view returns(bool) {
+        return _isPrivateUserMinted[_user][_round];
     }
 
     function userMintedAmount(address _user,bytes32 _round) public view returns(uint256) {
-        return _userMintedAmount[_user][_round];
+        return _privateUserMintedAmount[_user][_round];
     }
 
     function getTotalSupply() public view returns (uint256) {
-        return nagaKidContract.totalSupply();
+        return nagaKids.totalSupply();
     }
 
     function getMaxSupply() public view returns (uint256) {
-        return nagaKidContract.maxSupply();
+        return nagaKids.maxSupply();
     }
 
 }
