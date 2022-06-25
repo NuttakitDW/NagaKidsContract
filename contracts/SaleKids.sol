@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.15;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "./INagaKid.sol";
-import "./VerifySignature.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
-contract SaleKids is Ownable, ReentrancyGuard, VerifySignature {
+contract SaleKids is Ownable, ReentrancyGuard {
 
     bytes32 public constant WHITELIST_MINT_ROUND = keccak256("WHITELIST_MINT_ROUND"); // 0x68e7d51fdb912cb107dda2e59b053d87fcca666dd0ef5339cd3474ccb5276bba
     bytes32 public constant NAGA_HOLDER_MINT_ROUND = keccak256("NAGA_HOLDER_MINT_ROUND"); // 0xb3c595e55271590809f54e2f4fc3a582754f45b104dd3c41666e2ad310493db3
@@ -20,7 +20,7 @@ contract SaleKids is Ownable, ReentrancyGuard, VerifySignature {
     bytes32 public currentMintRound;
     bytes32 public merkleRoot;
 
-    bool public isPublic = false;
+    bool public isPrivate = false;
     bool public isPublic = false;
 
     address public signer;
@@ -93,7 +93,6 @@ contract SaleKids is Ownable, ReentrancyGuard, VerifySignature {
         //You can tip Naga Team if you want.
 
         require(isPrivate == true,"Private mint is not open.");
-        require(_round != DEFAULT,"Mint is not approved.");
         require(currentMintRound == _round, "Contract are not in this minting round.");
         require(getTotalSupply() + _amount <= 1011,"Over Supply Amount");
         require(isPrivateUserMinted(msg.sender, _round) == false, "You are already minted.");
@@ -115,9 +114,8 @@ contract SaleKids is Ownable, ReentrancyGuard, VerifySignature {
         require(isPublic == true, "Public mint is not open.");
         require(tx.origin == msg.sender, "haha Contract can't call me");
         require(isPublicUserMinted(msg.sender) != true, "You are already minted.");
-        require(getTotalSupply() + 1 <= 1111,"Over Supply Amount");
-        require(nagaKids.isMinter(address(this)), "Contract Mint is not approved.");
-        require(verify(signer,msg.sender,_sig), "Unauthorized PublicMint This User.");
+        require(getTotalSupply() + 1 <= 1111, "Over Supply Amount");
+        require(verify(signer, msg.sender, _sig), "Unauthorized PublicMint This User.");
 
         // publicMint User can get only 1 //
         uint256 _amount = 1; 
