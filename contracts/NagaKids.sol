@@ -17,7 +17,7 @@ contract NagaKids is ERC721A, ERC721AQueryable, ERC721ABurnable, Ownable {
     string public baseExtension = ".json";
     uint256 public constant maxSupply = 1111;
 
-    event SetAllowMinter(address indexed caller, address indexed minter, bool allowed);
+    event SetMinter(address indexed caller, address indexed minter);
 
     modifier onlyMinter() {
         require(msg.sender == minter, "You are not a minter");
@@ -32,7 +32,7 @@ contract NagaKids is ERC721A, ERC721AQueryable, ERC721ABurnable, Ownable {
         setBaseURI(_initBaseURI);
 
         // set Owner is minter //
-        setAllowMinter(msg.sender,true);
+        setMinter(msg.sender,true);
 
         // preMint 111 => ~ 10% of maxSuplly //
         safeMint(_preMintAddress,111);
@@ -40,7 +40,7 @@ contract NagaKids is ERC721A, ERC721AQueryable, ERC721ABurnable, Ownable {
 
     function setMinter(address _minter) public onlyOwner {
         minter = _minter;
-        emit SetAllowMinter(msg.sender, minter, allowed);
+        emit SetMinter(msg.sender, minter);
     }
 
     function _baseURI() internal view override returns (string memory) {
