@@ -64,8 +64,7 @@ contract NagaKids is ERC721A, ERC721AQueryable, ERC721ABurnable, Ownable {
     }
  
     function safeMint(address to,uint amount) public onlyMinter {
-        uint256 totalSupply = totalSupply();
-        require(totalSupply + amount <= maxSupply, "Over max supply");
+        require(totalSupply() + amount <= maxSupply, "Over max supply");
         _safeMint(to, amount);
     }
 
