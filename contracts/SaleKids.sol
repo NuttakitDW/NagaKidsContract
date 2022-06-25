@@ -115,7 +115,7 @@ contract SaleKids is Ownable, ReentrancyGuard {
         require(tx.origin == msg.sender, "haha Contract can't call me");
         require(isPublicUserMinted(msg.sender) != true, "You are already minted.");
         require(getTotalSupply() + 1 <= 1111, "Over Supply Amount");
-        require(verify(signer, msg.sender, _sig), "Unauthorized PublicMint This User.");
+        require(recover(signer, msg.sender, _sig), "Unauthorized PublicMint This User.");
 
         // publicMint User can get only 1 //
         uint256 _amount = 1; 
